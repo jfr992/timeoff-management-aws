@@ -39,6 +39,12 @@ Parameters:
   pEnvironment:
     Type: String
 
+  pHealthCheck:
+    Type: String
+
+  pLoadBalancerTimeOut:
+    Type: String
+
 Resources:
   
   rSecurityGroup:
@@ -51,6 +57,12 @@ Resources:
         - IpProtocol: tcp
           FromPort: 3000
           ToPort: 3000
+          CidrIp: 
+            Ref: pIpAwsAll
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
           CidrIp: 
             Ref: pIpAwsAll
       Tags:
@@ -130,28 +142,6 @@ Resources:
       AssociatePublicIpAddress: false
       SecurityGroups:
         - Ref: rSecurityGroup
-      UserData: !Base64 |
-              #!/bin/bash -x
-              export PATH=~/.local/bin:/$PATH
-              yum update -y 
-              yum install python3.7 -y
-              yum install java-1.8.0-openjdk-devel -y
-              yum erase awscli -y
-              cd /home/ec2-user
-              echo "export PATH=.local/bin:$PATH" >> .bash_profile
-              cd /home/ec2-user
-              wget https://bootstrap.pypa.io/get-pip.py
-              su -c "python3.7 get-pip.py --user" -s /bin/sh ec2-user
-              su -c "/home/ec2-user/.local/bin/pip3 install boto3 --user" -s /bin/sh ec2-user
-              su -c "/home/ec2-user/.local/bin/pip3 install awscli --user" -s /bin/sh ec2-user
-              #install node
-              sudo yum install -y gcc-c++ make
-              curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash -
-              sudo yum install -y nodejs 
-              #ssm agent installation
-              sudo yum install -y https://s3.region.amazonaws.com/amazon-ssm-region/latest/linux_amd64/amazon-ssm-agent.rpm
-              sudo systemctl enable amazon-ssm-agent
-              sudo systemctl start amazon-ssm-agent
  
             
   rAutoScalingGroup:
@@ -251,3 +241,43 @@ Resources:
             Ref: rAutoScalingGroup
       ComparisonOperator: GreaterThanThreshold
       MetricName: mem_used_percent
+
+
+  rLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internal
+      Name: 'timeoff-management-alb'
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value:
+            Ref: pLoadBalancerTimeOut
+      Subnets:
+        - !Ref pSubnet1
+        - !Ref pSubnet2
+      SecurityGroups:
+        - Ref: rSecurityGroup
+
+  rTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      HealthCheckPath:
+        Ref: pHealthCheck
+      Port: 3000
+      Protocol: HTTPS
+      Name: 'timeoff-management-tg'
+      UnhealthyThresholdCount: 5
+      VpcId:
+        Ref: pVpcId
+      TargetGroupAttributes:
+        - Key: stickiness.enabled
+          Value: true
+        - Key: stickiness.type
+          Value: lb_cookie
+        - Key: stickiness.lb_cookie.duration_seconds
+          Value: 3600
+        - Key: load_balancing.algorithm.type
+          Value: least_outstanding_requests
