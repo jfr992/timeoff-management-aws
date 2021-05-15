@@ -367,7 +367,7 @@ Resources:
       DefaultActions:
         - Type: forward
           TargetGroupArn:
-            Ref: rTargetGroup
+            Ref: rTargetGroupHTTPS
       LoadBalancerArn:
         Ref: rLoadBalancer
       Port: 443
@@ -382,7 +382,7 @@ Resources:
       DefaultActions:
         - Type: forward
           TargetGroupArn:
-            Ref: rTargetGroup
+            Ref: rTargetGroupHTTP
       LoadBalancerArn:
         Ref: rLoadBalancer
       Port: 80
