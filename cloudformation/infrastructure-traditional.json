@@ -1,7 +1,7 @@
 {
     "Parameters": {
       "pVpcId": "vpc-112bc477",
-      "pSubnet1": "subnet-99d73dc3",
+      "pSubnet1": "subnet-06d53ffd9cd970cc7",
       "pSubnet2": "subnet-df38e6b9",
       "pamiID": "ami-04468e03c37242e1e",
       "pInstanceType": "t2.micro",
@@ -12,6 +12,7 @@
       "pEnvironment": "dev",
       "pIpAwsAll": "0.0.0.0/0",
       "pHealthCheck": "/",
-      "pLoadBalancerTimeOut": "60"
+      "pLoadBalancerTimeOut": "60",
+      "pCertificateARN": "arn:aws:iam::989043534116:server-certificate/timeoff"
     }
   }
