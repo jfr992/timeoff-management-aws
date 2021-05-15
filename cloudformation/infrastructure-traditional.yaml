@@ -49,8 +49,8 @@ Resources:
         Ref: pVpcId
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 9600
-          ToPort: 9600
+          FromPort: 3000
+          ToPort: 3000
           CidrIp: 
             Ref: pIpAwsAll
       Tags:
@@ -121,12 +121,12 @@ Resources:
         Ref: rIamProfile
       InstanceType:
         Ref: pInstanceType
-      BlockDeviceMappings:
-        - DeviceName: /dev/sda1
-          Ebs:
-            DeleteOnTermination: true
-            Encrypted: true
-            VolumeSize: 60
+#      BlockDeviceMappings:
+#        - DeviceName: /dev/sda1
+#          Ebs:
+#            DeleteOnTermination: true
+#            Encrypted: true
+#            VolumeSize: 60
       AssociatePublicIpAddress: false
       SecurityGroups:
         - Ref: rSecurityGroup
