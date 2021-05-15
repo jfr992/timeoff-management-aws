@@ -147,7 +147,12 @@ Resources:
               #install node
               sudo yum install -y gcc-c++ make
               curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash -
-              sudo yum install -y nodejs  
+              sudo yum install -y nodejs 
+              #ssm agent installation
+              sudo yum install -y https://s3.region.amazonaws.com/amazon-ssm-region/latest/linux_amd64/amazon-ssm-agent.rpm
+              sudo systemctl enable amazon-ssm-agent
+              sudo systemctl start amazon-ssm-agent
+ 
             
   rAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
