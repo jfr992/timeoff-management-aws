@@ -18,7 +18,7 @@ Parameters:
   pInstanceType:
     Type: String
 
-  pCertificateArn:
+  pCertificateARN:
     Type: String
   ### IPs
 
