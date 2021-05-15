@@ -49,7 +49,35 @@ Parameters:
     Type: String
 
 Resources:
-  
+  rSecurityGroupALB:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SG
+      VpcId: 
+        Ref: pVpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          CidrIp: 
+            Ref: pIpAwsAll
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 
+            Ref: pIpAwsAll
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 
+            Ref: pIpAwsAll
+      Tags:
+        - Key: environment
+          Value: 
+            Ref: pEnvironment
+
   rSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -170,11 +198,6 @@ Resources:
               sudo yum install -y gcc-c++ make
               curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash -
               sudo yum install -y nodejs 
-              #ssm agent installation
-              sudo yum install -y https://s3.region.amazonaws.com/amazon-ssm-region/latest/linux_amd64/amazon-ssm-agent.rpm
-              sudo systemctl enable amazon-ssm-agent
-              sudo systemctl start amazon-ssm-agent
- 
             
   rAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -288,9 +311,9 @@ Resources:
         - !Ref pSubnet1
         - !Ref pSubnet2
       SecurityGroups:
-        - Ref: rSecurityGroup
+        - Ref: rSecurityGroupALB
 
-  rTargetGroup:
+  rTargetGroupHTTPS:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckIntervalSeconds: 30
@@ -300,7 +323,31 @@ Resources:
         Ref: pHealthCheck
       Port: 3000
       Protocol: HTTPS
-      Name: 'timeoff-management-tg'
+      Name: 'timeoff-management-tg-https'
+      UnhealthyThresholdCount: 5
+      VpcId:
+        Ref: pVpcId
+      TargetGroupAttributes:
+        - Key: stickiness.enabled
+          Value: true
+        - Key: stickiness.type
+          Value: lb_cookie
+        - Key: stickiness.lb_cookie.duration_seconds
+          Value: 3600
+        - Key: load_balancing.algorithm.type
+          Value: least_outstanding_requests
+
+  rTargetGroupHTTP:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      HealthCheckPath:
+        Ref: pHealthCheck
+      Port: 3000
+      Protocol: HTTP
+      Name: 'timeoff-management-tg-http'
       UnhealthyThresholdCount: 5
       VpcId:
         Ref: pVpcId
