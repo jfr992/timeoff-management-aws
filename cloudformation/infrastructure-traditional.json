@@ -10,6 +10,8 @@
       "pNodesMinSize": "2",
       "pNodesMaxSize": "4",
       "pEnvironment": "dev",
-      "pIpAwsAll": "0.0.0.0/0"
+      "pIpAwsAll": "0.0.0.0/0",
+      "pHealthCheck": "/",
+      "pLoadBalancerTimeOut": "60"
     }
   }
