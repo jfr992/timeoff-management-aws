@@ -1,46 +1,15 @@
-[
-    {
-        "ParameterKey": "pVpcId",
-        "ParameterValue": "vpc-112bc477"
-    },
-    {
-        "ParameterKey": "pSubnet1",
-        "ParameterValue": "subnet-99d73dc3"
-    },
-    {
-        "ParameterKey": "pSubnet2",
-        "ParameterValue": "subnet-df38e6b9"
-    },
-    {
-        "ParameterKey": "pamiID",
-        "ParameterValue": "ami-04468e03c37242e1e"
-    },
-    {
-        "ParameterKey": "pInstanceType",
-        "ParameterValue": "t2.micro"
-    },
-    {
-        "ParameterKey": "pScaleUpWaitTime",
-        "ParameterValue": "1500"
-    },
-    {
-        "ParameterKey": "pScaleUpPercentage",
-        "ParameterValue": "80"
-    },
-    {
-        "ParameterKey": "pNodesMinSize",
-        "ParameterValue": "2"
-    },
-    {
-        "ParameterKey": "pNodesMaxSize",
-        "ParameterValue": "4"
-    },
-    {
-        "ParameterKey": "pEnvironment",
-        "ParameterValue": "dev"
-    },
-    {
-        "ParameterKey": "pIpAwsAll",
-        "ParameterValue": "0.0.0.0/0"
+{
+    "Parameters": {
+      "pVpcId": "vpc-112bc477",
+      "pSubnet1": "subnet-99d73dc3",
+      "pSubnet2": "subnet-df38e6b9",
+      "pamiID": "ami-04468e03c37242e1e",
+      "pInstanceType": "t2.micro",
+      "pScaleUpWaitTime": "1500",
+      "pScaleUpPercentage": "80",
+      "pNodesMinSize": "2",
+      "pNodesMaxSize": "4",
+      "pEnvironment": "dev",
+      "pIpAwsAll": "0.0.0.0/0"
     }
-]
+  }

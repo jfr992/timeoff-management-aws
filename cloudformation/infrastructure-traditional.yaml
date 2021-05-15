@@ -49,8 +49,8 @@ Resources:
         Ref: pVpcId
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 9600
-          ToPort: 9600
+          FromPort: 3000
+          ToPort: 3000
           CidrIp: 
             Ref: pIpAwsAll
       Tags:
@@ -121,12 +121,12 @@ Resources:
         Ref: rIamProfile
       InstanceType:
         Ref: pInstanceType
-      BlockDeviceMappings:
-        - DeviceName: /dev/sda1
-          Ebs:
-            DeleteOnTermination: true
-            Encrypted: true
-            VolumeSize: 60
+#      BlockDeviceMappings:
+#        - DeviceName: /dev/sda1
+#          Ebs:
+#            DeleteOnTermination: true
+#            Encrypted: true
+#            VolumeSize: 60
       AssociatePublicIpAddress: false
       SecurityGroups:
         - Ref: rSecurityGroup
@@ -147,7 +147,12 @@ Resources:
               #install node
               sudo yum install -y gcc-c++ make
               curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash -
-              sudo yum install -y nodejs  
+              sudo yum install -y nodejs 
+              #ssm agent installation
+              sudo yum install -y https://s3.region.amazonaws.com/amazon-ssm-region/latest/linux_amd64/amazon-ssm-agent.rpm
+              sudo systemctl enable amazon-ssm-agent
+              sudo systemctl start amazon-ssm-agent
+ 
             
   rAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
