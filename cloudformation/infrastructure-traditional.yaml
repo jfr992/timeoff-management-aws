@@ -17,6 +17,9 @@ Parameters:
 
   pInstanceType:
     Type: String
+
+  pCertificateArn:
+    Type: String
   ### IPs
 
   pIpAwsAll:
@@ -63,6 +66,12 @@ Resources:
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
+          CidrIp: 
+            Ref: pIpAwsAll
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
           CidrIp: 
             Ref: pIpAwsAll
       Tags:
@@ -143,6 +152,28 @@ Resources:
       AssociatePublicIpAddress: false
       SecurityGroups:
         - Ref: rSecurityGroup
+      UserData: !Base64 |
+              #!/bin/bash -x
+              export PATH=~/.local/bin:/$PATH
+              yum update -y 
+              yum install python3.7 -y
+              yum install java-1.8.0-openjdk-devel -y
+              yum erase awscli -y
+              cd /home/ec2-user
+              echo "export PATH=.local/bin:$PATH" >> .bash_profile
+              cd /home/ec2-user
+              wget https://bootstrap.pypa.io/get-pip.py
+              su -c "python3.7 get-pip.py --user" -s /bin/sh ec2-user
+              su -c "/home/ec2-user/.local/bin/pip3 install boto3 --user" -s /bin/sh ec2-user
+              su -c "/home/ec2-user/.local/bin/pip3 install awscli --user" -s /bin/sh ec2-user
+              #install node
+              sudo yum install -y gcc-c++ make
+              curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash -
+              sudo yum install -y nodejs 
+              #ssm agent installation
+              sudo yum install -y https://s3.region.amazonaws.com/amazon-ssm-region/latest/linux_amd64/amazon-ssm-agent.rpm
+              sudo systemctl enable amazon-ssm-agent
+              sudo systemctl start amazon-ssm-agent
  
             
   rAutoScalingGroup:
@@ -282,3 +313,30 @@ Resources:
           Value: 3600
         - Key: load_balancing.algorithm.type
           Value: least_outstanding_requests
+
+  rListenerSecure:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn:
+            Ref: rTargetGroup
+      LoadBalancerArn:
+        Ref: rLoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn:
+            Ref: pCertificateARN
+
+  rListenerNonSecure:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn:
+            Ref: rTargetGroup
+      LoadBalancerArn:
+        Ref: rLoadBalancer
+      Port: 80
+      Protocol: HTTP
