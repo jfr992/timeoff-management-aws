@@ -1,0 +1,251 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Deploys traditional infrastructure to serve timeoff-management applcation
+
+Parameters:
+  ### AWS
+  pVpcId:
+    Type: AWS::EC2::VPC::Id
+    
+  pSubnet1:
+    Type: AWS::EC2::Subnet::Id
+
+  pSubnet2:
+    Type: AWS::EC2::Subnet::Id
+
+  pamiID:
+    Type: String
+
+  pInstanceType:
+    Type: String
+  ### IPs
+
+  pIpAwsAll:
+    Type: String
+
+  ### APP
+  
+  pScaleUpWaitTime:
+    Type: String
+  
+  pScaleUpPercentage:
+    Type: String
+
+  pNodesMinSize:
+    Type: String
+  
+  pNodesMaxSize:
+    Type: String
+  
+  pEnvironment:
+    Type: String
+
+Resources:
+  
+  rSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SG
+      VpcId: 
+        Ref: pVpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 9600
+          ToPort: 9600
+          CidrIp: 
+            Ref: pIpAwsAll
+      Tags:
+        - Key: environment
+          Value: 
+            Ref: pEnvironment
+
+  rIamProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - Ref: rRole
+
+  rRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: 'SSM-EC2-permissions'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action: 
+                  - ssm:DescribeAssociation
+                  - ssm:GetDeployablePatchSnapshotForInstance
+                  - ssm:GetDocument
+                  - ssm:DescribeDocument
+                  - ssm:GetManifest
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:ListAssociations
+                  - ssm:ListInstanceAssociations
+                  - ssm:PutInventory
+                  - ssm:PutComplianceItems
+                  - ssm:PutConfigurePackageResult
+                  - ssm:UpdateAssociationStatus
+                  - ssm:UpdateInstanceAssociationStatus
+                  - ssm:UpdateInstanceInformation
+                  - ssmmessages:CreateControlChannel
+                  - ssmmessages:CreateDataChannel
+                  - ssmmessages:OpenControlChannel
+                  - ssmmessages:OpenDataChannel
+                  - ec2messages:AcknowledgeMessage
+                  - ec2messages:DeleteMessage
+                  - ec2messages:FailMessage
+                  - ec2messages:GetEndpoint
+                  - ec2messages:GetMessages
+                  - ec2messages:SendReply
+                Effect: Allow
+                Resource: '*'
+
+  rLaunchConfig:
+    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Properties:
+      ImageId:
+        Ref: pamiID
+      InstanceMonitoring: true
+      IamInstanceProfile:
+        Ref: rIamProfile
+      InstanceType:
+        Ref: pInstanceType
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 60
+      AssociatePublicIpAddress: false
+      SecurityGroups:
+        - Ref: rSecurityGroup
+      UserData:
+        Fn::Base64: 
+          Fn::Sub:
+            - |
+              #!/bin/bash -x
+              export PATH=~/.local/bin:/$PATH
+              yum update -y 
+              yum install python3.7 -y
+              yum install java-1.8.0-openjdk-devel -y
+              yum erase awscli -y
+              cd /home/ec2-user
+              echo "export PATH=.local/bin:$PATH" >> .bash_profile
+              cd /home/ec2-user
+              wget https://bootstrap.pypa.io/get-pip.py
+              su -c "python3.7 get-pip.py --user" -s /bin/sh ec2-user
+              su -c "/home/ec2-user/.local/bin/pip3 install boto3 --user" -s /bin/sh ec2-user
+              su -c "/home/ec2-user/.local/bin/pip3 install awscli --user" -s /bin/sh ec2-user
+              #install node
+              sudo yum install -y gcc-c++ make
+              curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash -
+              sudo yum install -y nodejs  
+            
+  rAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: 'timeoff-management-asg'
+      VPCZoneIdentifier:
+      - Ref: pSubnet1
+      - Ref: pSubnet2
+      HealthCheckType: EC2
+      LaunchConfigurationName:
+        Ref: rLaunchConfig
+      MinSize: 
+        Ref: pNodesMinSize
+      MaxSize:
+        Ref: pNodesMaxSize
+      DesiredCapacity:
+        Ref: pNodesMinSize
+
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MinInstancesInService: 0
+        MaxBatchSize: 1
+        PauseTime: "PT2M30S"
+        SuspendProcesses:
+          - AZRebalance
+          - AlarmNotification
+          - ScheduledActions
+
+
+  rTargetTrackingScalingPolicyLogs:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName:
+        Ref: rAutoScalingGroup
+      Cooldown: 60
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 75
+
+  rCPUScaleUpPolicyLogs:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName:
+        Ref: rAutoScalingGroup
+      Cooldown:
+        Ref: pScaleUpWaitTime
+      ScalingAdjustment: 1
+
+  rCPUAlarmHighLogs:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: 1
+      Statistic: Average
+      Threshold:
+        Ref: pScaleUpPercentage
+      AlarmDescription: Alarm if CPU too high or metric disappears indicating instance is down
+      Period: 60
+      AlarmActions:
+        - Ref: rCPUScaleUpPolicyLogs
+      Namespace: AWS/EC2
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value:
+            Ref: rAutoScalingGroup
+      ComparisonOperator: GreaterThanThreshold
+      MetricName: CPUUtilization
+
+  rMemScaleUpPolicyLogs:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName:
+        Ref: rAutoScalingGroup
+      Cooldown:
+        Ref: pScaleUpWaitTime
+      ScalingAdjustment: 1
+
+  rMemAlarmHighLogs:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: 1
+      Statistic: Average
+      Threshold:
+        Ref: pScaleUpPercentage
+      AlarmDescription: Alarm if Memory too high or metric disappears indicating instance is down
+      Period: 60
+      AlarmActions:
+        - Ref: rMemScaleUpPolicyLogs
+      Namespace: CWAgent
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value:
+            Ref: rAutoScalingGroup
+      ComparisonOperator: GreaterThanThreshold
+      MetricName: mem_used_percent
