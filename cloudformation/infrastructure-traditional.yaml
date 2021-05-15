@@ -133,6 +133,7 @@ Resources:
         Ref: rIamProfile
       InstanceType:
         Ref: pInstanceType
+      KeyName: 'test'
 #      BlockDeviceMappings:
 #        - DeviceName: /dev/sda1
 #          Ebs:
