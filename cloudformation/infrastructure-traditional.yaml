@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys traditional infrastructure to serve timeoff-management applcation
+Description: Deploys traditional infrastructure to serve timeoff-management application
 
 Parameters:
   ### AWS
@@ -57,17 +57,10 @@ Resources:
         Ref: pVpcId
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 3000
-          ToPort: 3000
-          CidrIp: 
-            Ref: pIpAwsAll
-      SecurityGroupIngress:
-        - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
           CidrIp: 
             Ref: pIpAwsAll
-      SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
@@ -90,13 +83,11 @@ Resources:
           ToPort: 3000
           CidrIp: 
             Ref: pIpAwsAll
-      SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
           CidrIp: 
             Ref: pIpAwsAll
-      SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
@@ -159,6 +150,16 @@ Resources:
                   - ec2messages:SendReply
                 Effect: Allow
                 Resource: '*'
+        - PolicyName: 's3-access'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action: 
+                - "s3:PutObject"
+                - "s3:Get*"
+                - "s3:List*"
+                Effect: Allow
+                Resource: '*'
 
   rLaunchConfig:
     Type: 'AWS::AutoScaling::LaunchConfiguration'
@@ -194,9 +195,10 @@ Resources:
               su -c "python3.7 get-pip.py --user" -s /bin/sh ec2-user
               su -c "/home/ec2-user/.local/bin/pip3 install boto3 --user" -s /bin/sh ec2-user
               su -c "/home/ec2-user/.local/bin/pip3 install awscli --user" -s /bin/sh ec2-user
+              
               #install node
               yum install -y gcc-c++ make
-              curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash -
+              curl -sL https://rpm.nodesource.com/setup_12.x | sudo -E bash -
               yum install -y nodejs 
               #git install
               yum -y install git
@@ -214,6 +216,16 @@ Resources:
               tar -xvf phantomjs-1.9.8-linux-x86_64.tar \
                   --directory /opt/phantomjs/ --strip-components 1
               ln -s /opt/phantomjs/bin/phantomjs /usr/bin/phantomjs
+              #install chrome-driver
+              cd /tmp/
+              wget https://chromedriver.storage.googleapis.com/80.0.3987.106/chromedriver_linux64.zip
+              unzip chromedriver_linux64.zip
+              mv chromedriver /usr/bin/chromedriver
+              #Install initial version of app
+              #git clone https://github.com/timeoff-management/application.git /var/timeoff-management
+              #cd /var/timeoff-management
+              #npm install
+              #nohup /usr/bin/npm --prefix /var/timeoff-management/ run start </dev/null &>/dev/null &
             
   rAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -243,8 +255,8 @@ Resources:
           - AZRebalance
           - AlarmNotification
 
-
-  rTargetTrackingScalingPolicyLogs:
+##Elastic ASG Configs
+  rTargetTrackingScalingPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:
       AutoScalingGroupName:
@@ -256,7 +268,7 @@ Resources:
           PredefinedMetricType: ASGAverageCPUUtilization
         TargetValue: 75
 
-  rCPUScaleUpPolicyLogs:
+  rCPUScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:
       AdjustmentType: ChangeInCapacity
@@ -266,7 +278,7 @@ Resources:
         Ref: pScaleUpWaitTime
       ScalingAdjustment: 1
 
-  rCPUAlarmHighLogs:
+  rCPUAlarmHigh:
     Type: AWS::CloudWatch::Alarm
     Properties:
       EvaluationPeriods: 1
@@ -276,7 +288,7 @@ Resources:
       AlarmDescription: Alarm if CPU too high or metric disappears indicating instance is down
       Period: 60
       AlarmActions:
-        - Ref: rCPUScaleUpPolicyLogs
+        - Ref: rCPUScaleUpPolicy
       Namespace: AWS/EC2
       Dimensions:
         - Name: AutoScalingGroupName
@@ -285,7 +297,7 @@ Resources:
       ComparisonOperator: GreaterThanThreshold
       MetricName: CPUUtilization
 
-  rMemScaleUpPolicyLogs:
+  rMemScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:
       AdjustmentType: ChangeInCapacity
@@ -295,7 +307,7 @@ Resources:
         Ref: pScaleUpWaitTime
       ScalingAdjustment: 1
 
-  rMemAlarmHighLogs:
+  rMemAlarmHigh:
     Type: AWS::CloudWatch::Alarm
     Properties:
       EvaluationPeriods: 1
@@ -305,7 +317,7 @@ Resources:
       AlarmDescription: Alarm if Memory too high or metric disappears indicating instance is down
       Period: 60
       AlarmActions:
-        - Ref: rMemScaleUpPolicyLogs
+        - Ref: rMemScaleUpPolicy
       Namespace: CWAgent
       Dimensions:
         - Name: AutoScalingGroupName
@@ -339,8 +351,8 @@ Resources:
       HealthCheckPath:
         Ref: pHealthCheck
       Port: 3000
-      Protocol: HTTPS
-      Name: 'timeoff-management-tg-https'
+      Protocol: HTTP
+      Name: 'time-off-management-tg-https'
       UnhealthyThresholdCount: 5
       VpcId:
         Ref: pVpcId
@@ -364,7 +376,7 @@ Resources:
         Ref: pHealthCheck
       Port: 3000
       Protocol: HTTP
-      Name: 'timeoff-management-tg-http'
+      Name: 'time-off-management-tg-http'
       UnhealthyThresholdCount: 5
       VpcId:
         Ref: pVpcId
