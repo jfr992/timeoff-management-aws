@@ -1,29 +1,3 @@
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Thanks again! Now go create something AMAZING! :D
--->
-
-
-
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-
-
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
@@ -53,7 +27,7 @@
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#architecture">Architecture of the solution</a></li>
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
@@ -70,18 +44,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-
-There are many great README templates available on GitHub, however, I didn't find one that really suit my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
-
-Here's why:
-* Your time should be focused on creating something amazing. A project that solves a problem and helps others
-* You shouldn't be doing the same tasks over and over like creating a README from scratch
-* You should element DRY principles to the rest of your life :smile:
-
-Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have have contributed to expanding this template!
-
-A list of commonly used resources that I find helpful are listed in the acknowledgements.
-
+This repo contains the steps and the code needed to deploy the infrastructure and componentes needed to deploy the timeoff-management app. It can tbe reproduced if the guide is followed strictly.
 ### Built With
 
 This section should list any major frameworks that you built your project using. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
@@ -92,30 +55,50 @@ This section should list any major frameworks that you built your project using.
 * [Other Services: AWS SSM, S3, AWS CloudWatch]
 
 
-
-
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
-
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+- Fork the timeoff-management-application to your repositories to work from a feature/branch for the source-control deploy.
 
-### Installation
+- aws cli V2.0
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+- Create an additional subnet if the default vpc is used.
+
+- Create a Nat gateway for the EC2 instances to access internet (download and install packages)
+
+- Create 2 adittional routes for each subnet to access the internet: adding the entry 0.0.0.0/0 and linking it to the previously created NAT Gateway
+
+- Link previously created routes to the private subnets
+
+- If public acess needed create an additional subnet and allow internet access with an InternetGateway
+
+- Create an IAM user with proper permissions to use the CLI (AWS ACCESS KEY ID AND SECRET ACESS KEY)
+
+### Architecture of the solution
+1. Infrastructure to host the app
+
+
+<p align="center">
+  <a href="https://github.com/jfr992/timeoff-management-aws">
+    <img src="images/infrastructure.png" alt="infrastructure" width="80" height="80">
+  </a>
+</p>
+
+2. CI/CD deployment
+<br />
+<p align="center">
+  <a href="https://github.com/jfr992/timeoff-management-aws">
+    <img src="images/infrastructure.png" alt="infrastructure" width="80" height="80">
+  </a>
+</p>
+
+1. Clone the repo
    ```sh
-   git clone https://github.com/your_username_/Project-Name.git
+   git clone https://github.com/jfr992/timeoff-management-aws.git
    ```
-3. Install NPM packages
+2. Install NPM packages
    ```sh
    npm install
    ```
@@ -185,22 +168,3 @@ Project Link: [https://github.com/your_username/repo_name](https://github.com/yo
 * [JVectorMap](http://jvectormap.com)
 * [Font Awesome](https://fontawesome.com)
 
-
-
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://https://github.com/jfr992/timeoff-management-aws/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://https://github.com/jfr992/timeoff-management-aws/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://https://github.com/jfr992/timeoff-management-aws/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://https://github.com/jfr992/timeoff-management-aws/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://https://github.com/jfr992/timeoff-management-aws/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: www.linkedin.com/in/jfreyesm992
-[product-screenshot]: images/screenshot.png
