@@ -1,10 +1,6 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/jfr992/timeoff-management-aws">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
-
   <h3 align="center">timeoff-management-deploy-traditional</h3>
 
   <p align="center">
@@ -82,7 +78,7 @@ This section should list any major frameworks that you built your project using.
 
 <p align="center">
   <a href="https://github.com/jfr992/timeoff-management-aws">
-    <img src="images/infrastructure.png" alt="infrastructure" width="800" height="800">
+    <img src="images/infrastructure.png" alt="infrastructure" width="600" height="600">
   </a>
 </p>
 
@@ -90,7 +86,7 @@ This section should list any major frameworks that you built your project using.
 <br />
 <p align="center">
   <a href="https://github.com/jfr992/timeoff-management-aws">
-    <img src="images/infrastructure.png" alt="infrastructure" width="80" height="80">
+    <img src="images/pipeline.png" alt="pipeline" width="600" height="600">
   </a>
 </p>
 
