@@ -185,7 +185,7 @@ Resources:
               export PATH=~/.local/bin:/$PATH
               yum update -y 
               yum install python3.7 -y
-              yum install java-1.8.0-openjdk-devel -y
+              #install aws-cli
               yum erase awscli -y
               cd /home/ec2-user
               echo "export PATH=.local/bin:$PATH" >> .bash_profile
@@ -195,9 +195,25 @@ Resources:
               su -c "/home/ec2-user/.local/bin/pip3 install boto3 --user" -s /bin/sh ec2-user
               su -c "/home/ec2-user/.local/bin/pip3 install awscli --user" -s /bin/sh ec2-user
               #install node
-              sudo yum install -y gcc-c++ make
+              yum install -y gcc-c++ make
               curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash -
-              sudo yum install -y nodejs 
+              yum install -y nodejs 
+              #git install
+              yum -y install git
+              #code deploy agent install
+              yum install -y ruby
+              wget https://aws-codedeploy-eu-west-1.s3.eu-west-1.amazonaws.com/latest/install
+              chmod +x ./install
+              ./install auto
+              service codedeploy-agent status
+              #phantomjs install
+              yum -y install fontconfig freetype freetype-devel fontconfig-devel libstdc++
+              wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.8-linux-x86_64.tar.bz2
+              mkdir -p /opt/phantomjs
+              bzip2 -d phantomjs-1.9.8-linux-x86_64.tar.bz2
+              tar -xvf phantomjs-1.9.8-linux-x86_64.tar \
+                  --directory /opt/phantomjs/ --strip-components 1
+              ln -s /opt/phantomjs/bin/phantomjs /usr/bin/phantomjs
             
   rAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -215,7 +231,9 @@ Resources:
         Ref: pNodesMaxSize
       DesiredCapacity:
         Ref: pNodesMinSize
-
+      TargetGroupARNs:
+        - Ref: rTargetGroupHTTPS
+        - Ref: rTargetGroupHTTP
     UpdatePolicy:
       AutoScalingRollingUpdate:
         MinInstancesInService: 0
@@ -224,7 +242,6 @@ Resources:
         SuspendProcesses:
           - AZRebalance
           - AlarmNotification
-          - ScheduledActions
 
 
   rTargetTrackingScalingPolicyLogs:
