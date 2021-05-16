@@ -78,7 +78,7 @@ This section should list any major frameworks that you built your project using.
 
 <p align="center">
   <a href="https://github.com/jfr992/timeoff-management-aws">
-    <img src="images/infrastructure.png" alt="infrastructure" width="600" height="600">
+    <img src="images/infrastructure.png" alt="infrastructure" width="700" height="600">
   </a>
 </p>
 
@@ -86,7 +86,7 @@ This section should list any major frameworks that you built your project using.
 <br />
 <p align="center">
   <a href="https://github.com/jfr992/timeoff-management-aws">
-    <img src="images/pipeline.png" alt="pipeline" width="600" height="600">
+    <img src="images/pipeline.png" alt="pipeline" width="700" height="600">
   </a>
 </p>
 
