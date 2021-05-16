@@ -10,8 +10,8 @@
       "pNodesMinSize": "2",
       "pNodesMaxSize": "4",
       "pEnvironment": "dev",
-      "pIpAwsAll": "0.0.0.0/0",
-      "pHealthCheck": "/",
+      "pIpAwsAll": "172.31.0.0/16",
+      "pHealthCheck": "/login/",
       "pLoadBalancerTimeOut": "60",
       "pCertificateARN": "arn:aws:iam::989043534116:server-certificate/timeoff"
     }
