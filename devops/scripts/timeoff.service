@@ -1,0 +1,16 @@
+[Unit]
+Description=timeoff-management
+After=network.target
+
+[Service]
+ExecStart=npm --prefix /var/timeoff-management/ run start
+Restart=always
+RestartSec=500ms
+StartLimitInterval=0
+User=nobody
+Group=nogroup
+Environment=PATH=/usr/bin:/usr/local/bin
+WorkingDirectory=/var/timeoff-management
+
+[Install]
+WantedBy=multi-use.target
