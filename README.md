@@ -61,21 +61,22 @@ This section should list any major frameworks that you built your project using.
 
 - aws cli V2.0
 
-- Create an additional subnet if the default vpc is used.
+- An additional subnet if the default vpc is used.
 
-- Create a Nat gateway for the EC2 instances to access internet (download and install packages)
+- Nat gateway for the EC2 instances to access internet (download and install packages).
 
-- Create 2 adittional routes for each subnet to access the internet: adding the entry 0.0.0.0/0 and linking it to the previously created NAT Gateway
+- 2 adittional routes for each subnet to access the internet: adding the entry 0.0.0.0/0 and link it to the previously created NAT Gateway.
 
-- Link previously created routes to the private subnets
+- Link previously created routes to the private subnets.
 
-- If public acess needed create an additional subnet and allow internet access with an InternetGateway
+- If public acess needed create an additional subnet and allow internet access with an InternetGateway.
 
-- Create an IAM user with proper permissions to use the CLI (AWS ACCESS KEY ID AND SECRET ACESS KEY)
+- IAM user with proper permissions to use the CLI (AWS ACCESS KEY ID AND SECRET ACESS KEY).
 
-### Architecture of the solution
-1. Infrastructure to host the app
+- Personal access token from github (ref:https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)
 
+### Architecture diagrams of the solution
+1.  Infrastructure to host the app
 
 <p align="center">
   <a href="https://github.com/jfr992/timeoff-management-aws">
@@ -83,7 +84,17 @@ This section should list any major frameworks that you built your project using.
   </a>
 </p>
 
-2. CI/CD deployment
+2.  Pipeline to deploy infrastructure
+
+<br />
+<p align="center">
+  <a href="https://github.com/jfr992/timeoff-management-aws">
+    <img src="images/infrapipeline.png" alt="infrapipeline" width="700" height="600">
+  </a>
+</p>
+
+3.  CI/CD deployment
+
 <br />
 <p align="center">
   <a href="https://github.com/jfr992/timeoff-management-aws">
@@ -91,19 +102,86 @@ This section should list any major frameworks that you built your project using.
   </a>
 </p>
 
-1. Clone the repo
-   ```sh
-   git clone https://github.com/jfr992/timeoff-management-aws.git
-   ```
-2. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```JS
-   const API_KEY = 'ENTER YOUR API';
-   ```
+### Steps to deploy the solution
 
+1. Create the additional resources mentioned in pre-requisites section with aws cli or management console.
+
+2. Configure AWS CLI to access your account.
+   ```sh
+   aws configure
+   ```
+3. Create or update an AWS Secret for the github access token.
+   ```sh
+   aws secretsmanager create-secret --name githubaccess-token --secret-string '{"token":"<PERSONALTOKENHERE>"}' --region <REGION-HERE>
+   ```
+4. Deploy the previous infrastructure using AWS CLI and cloudformation
+   ```sh
+   aws cloudformation create-stack --stack-name previous-infrastructure --template-body file://path/to/previous-infrastructure.yaml --parameters file://previous-infrastructure.json --capabilities CAPABILITY_IAM
+   ```
+  Wait for the stack to get in CREATE_COMPLETE STATE
+
+  <p align="center">
+    <a href="https://github.com/jfr992/timeoff-management-aws">
+      <img src="images/previousInfrastructuredeploystack.png" alt="previousInfrastructuredeploystack" width="400" height="400">
+    </a>
+  </p>
+
+5. After the stacks is deployed, the infrastructure pipeline triggers the creation of the infrastructure stack to host the timeoff-management app (see architecture diagram)
+
+  <p align="center">
+    <a href="https://github.com/jfr992/timeoff-management-aws">
+      <img src="images/infrastack.png" alt="infrastack" width="400" height="400">
+    </a>
+  </p>
+
+  Wait for the EC2 instances to get in a healthy state:
+
+  <p align="center">
+    <a href="https://github.com/jfr992/timeoff-management-aws">
+      <img src="images/ec2healthy.png" alt="ec2healthy" width="400" height="400">
+    </a>
+  </p>
+
+6. Deploy the app deploy stack using AWS CLI and cloudformation
+   ```sh
+  aws cloudformation create-stack --stack-name app-deploy --template-body file:///path/to/app-deploy.yaml --parameters file:///path/toapp-deploy.json --capabilities CAPABILITY_IAM
+   ```
+  
+  Wait for the stack to be in CREATE_COMPLETE STATE
+
+  <p align="center">
+    <a href="https://github.com/jfr992/timeoff-management-aws">
+      <img src="images/appdeploystack.png" alt="ec2healthy" width="400" height="400">
+    </a>
+  </p>
+
+7. After the stacks is deployed, the app pipeline triggers the deployment of the timeoff-management app to the ec2 instances.
+
+    <div class="row">
+      <div class="column">
+        <img src="images/apppipelineinprogress.png" alt="apppipelineinprogress" style="width:100%">
+      </div>
+      <div class="column">
+        <img src="images/apppipelinesteps.png" alt="apppipelinesteps" style="width:100%">
+      </div>
+      <div class="column">
+        <img src="images/codedeployprogress.png" alt="codedeployprogress" style="width:100%">
+      </div>
+    </div>
+
+8. Wait for CodeDeploy to update the app on each instance, and check that the target groups are in healthy state:
+
+    <div class="row">
+      <div class="column">
+        <img src="images/codedeployhooks.png" alt="codedeployhooks" style="width:100%">
+      </div>
+      <div class="column">
+        <img src="images/httptg.png" alt="httptg" style="width:100%">
+      </div>
+      <div class="column">
+        <img src="images/httpstg.png" alt="httpstg" style="width:100%">
+      </div>
+    </div>
 
 
 <!-- USAGE EXAMPLES -->
@@ -121,47 +199,4 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 See the [open issues](https://https://github.com/jfr992/timeoff-management-aws/issues) for a list of proposed features (and known issues).
 
 
-
-<!-- CONTRIBUTING -->
-## Contributing
-
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-
-
-<!-- LICENSE -->
-## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
-
-
-<!-- CONTACT -->
-## Contact
-
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
-
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
-
-
-
-<!-- ACKNOWLEDGEMENTS -->
-## Acknowledgements
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Img Shields](https://shields.io)
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Pages](https://pages.github.com)
-* [Animate.css](https://daneden.github.io/animate.css)
-* [Loaders.css](https://connoratherton.com/loaders)
-* [Slick Carousel](https://kenwheeler.github.io/slick)
-* [Smooth Scroll](https://github.com/cferdinandi/smooth-scroll)
-* [Sticky Kit](http://leafo.net/sticky-kit)
-* [JVectorMap](http://jvectormap.com)
-* [Font Awesome](https://fontawesome.com)
 
