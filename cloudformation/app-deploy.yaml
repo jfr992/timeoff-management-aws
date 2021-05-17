@@ -1,0 +1,212 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CodeDeploy Resources, Codepipeline for app and Codebuild.
+Parameters:
+  pS3artifacts:
+    Type: String
+
+  pGitHubOwner:
+    Type: String
+
+  pGitHubRepo:
+    Type: String
+
+  pGitHubBranch:
+    Type: String
+
+  pgithubRepo:
+    Type: String
+
+  pALBName:
+    Type: String
+
+  pTargetGroupName:
+    Type: String
+
+  pGitHubOAuthToken:
+    Type: String
+    NoEcho: true
+
+Resources:
+  rAppPipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      RoleArn:
+        Fn::GetAtt: [ rcodepipelineServiceRole, Arn ]
+      ArtifactStore:
+        Location:
+          Ref:
+            pS3artifacts
+        Type: S3
+      Stages:
+        - Name: Source
+          Actions:
+          - Name: Source
+            InputArtifacts: []
+            ActionTypeId:
+              Category: Source
+              Owner: ThirdParty
+              Version: 1
+              Provider: GitHub
+            OutputArtifacts:
+            - Name: SourceArtifact
+            Configuration:
+              Owner: 
+                Ref: pGitHubOwner
+              Repo: 
+                Ref: pGitHubRepo
+              Branch: 
+                Ref: pGitHubBranch
+              PollForSourceChanges: true
+              OAuthToken:
+                Ref: pGitHubOAuthToken          
+            RunOrder: 1
+
+        - Name: Build
+          Actions:
+          - Name: Build
+            ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+            OutputArtifacts:
+              - Name: BuildArtifact
+            InputArtifacts:
+              - Name: SourceArtifact
+            Configuration:
+                ProjectName: 
+                  Ref: rcodeBuildProject
+            RunOrder: 1
+
+        - Name: Deploy
+          Actions:
+          - Name: DeployApp
+            ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CodeDeploy
+            InputArtifacts:
+              - Name: BuildArtifact
+            Configuration:
+                ApplicationName: 
+                  Ref: rApplication
+                DeploymentGroupName: 
+                  Ref: rDeploymentGroup
+            RunOrder: 1
+
+  rcodepipelineServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: codepipeline.amazonaws.com
+          Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  rcodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    DependsOn: rcodeBuildServiceRole
+    Properties:
+      Name: 'timeoff-management-app-build'
+      Artifacts:
+        Type: no_artifacts
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+        Type: LINUX_CONTAINER
+      ServiceRole: 
+        Ref: rcodeBuildServiceRole
+      Source:
+        Type: GITHUB
+        Location:
+          Ref: pgithubRepo
+      Auth:
+        Type: OAUTH
+        Resource:
+          Ref: pGitHubOAuthToken
+      SourceVersion:
+        Ref: pGitHubBranch
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+              ExcludeMatchedPattern: false
+            - Type: HEAD_REF
+              Pattern: refs/heads/feature/jreyes # 'master' is Branch name
+              ExcludeMatchedPattern: false
+
+  rcodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: codebuild.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  rApplication:
+    Type: AWS::CodeDeploy::Application
+    Properties: 
+      ApplicationName: 'timeoff-management-app'
+      ComputePlatform: Server
+  
+  rDeploymentGroup:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties:
+      ApplicationName: 
+        Ref: rApplication
+      DeploymentConfigName: 'CodeDeployDefault.OneAtATime'
+      DeploymentGroupName: 'timeoff-management-dg'
+      LoadBalancerInfo:
+        ElbInfoList: 
+          - Name:
+              Ref: pALBName
+        TargetGroupInfoList:
+          - Name:
+              Ref: pTargetGroupName
+      DeploymentStyle:
+        DeploymentOption: WITH_TRAFFIC_CONTROL
+        DeploymentType: IN_PLACE
+      ServiceRoleArn:
+        Fn::GetAtt: [ rcodeDeployServiceRole, Arn ]
+
+  rcodeDeployServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: codedeploy.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  rGITwebhook:
+    Type: 'AWS::CodePipeline::Webhook'
+    Properties:
+      Authentication: GITHUB_HMAC
+      AuthenticationConfiguration:
+        SecretToken: 
+          Ref: pGitHubOAuthToken
+      RegisterWithThirdParty: 'true'
+      Filters:
+      - JsonPath: "$.ref"
+        MatchEquals: refs/heads/{Branch}
+      TargetPipeline: 
+        Ref: rAppPipeline
+      TargetAction: Source
+      TargetPipelineVersion:
+        Fn::GetAtt: [ rAppPipeline, Version ]

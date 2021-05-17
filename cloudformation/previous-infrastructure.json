@@ -1,0 +1,22 @@
+[
+    {
+        "ParameterKey": "pGitHubOAuthToken",
+        "ParameterValue": "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"
+    },
+    {
+        "ParameterKey": "pGitHubOwner",
+        "ParameterValue": "jfr992"
+    },
+    {
+        "ParameterKey": "pGitHubRepo",
+        "ParameterValue": "timeoff-management-aws"
+    },
+    {
+        "ParameterKey": "pGitHubBranch",
+        "ParameterValue": "master"
+    },
+    {
+        "ParameterKey": "pstackName",
+        "ParameterValue": "timeoff-management-stack-traditional"
+    }
+]

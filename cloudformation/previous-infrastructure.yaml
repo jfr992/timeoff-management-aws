@@ -1,83 +1,132 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys traditional infrastructure to serve timeoff-management application
+Description: Deploys pipelines and previous infrastructure needed for everything (codepipeline,codedeploy,IAM and S3)
+
+Parameters:
+
+  pGitHubOAuthToken:
+    Type: String
+    NoEcho: true
+
+  pGitHubOwner:
+    Type: String
+
+  pGitHubRepo:
+    Type: String
+
+  pGitHubBranch:
+    Type: String
+    Default: master
+
+  pstackName:
+    Type: String
 
 Resources:
-  AppPipeline: 
-    Type: AWS::CodePipeline::Pipeline 
-    Properties: 
+  rS3artifacts:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: 'timeoff-management-s3-devops'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: "AES256"
+      VersioningConfiguration:
+        Status: Enabled
+
+  rInfrastructurepipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      ArtifactStore:
+        Type: S3
+        Location: 
+          Ref: rS3artifacts
+      RestartExecutionOnUpdate: true
       RoleArn:
-        Ref: CodePipelineServiceRole 
-      Stages: 
-        - 
-          Name: Source 
-          Actions: 
-            - 
-              Name: SourceAction
-              ActionTypeId: 
-                Category: Source 
-                Owner: AWS 
-                Version: 1 
-                Provider: S3 
-              OutputArtifacts: 
-                - 
-                  Name: SourceOutput 
-              Configuration: 
-                S3Bucket: 
-                  Ref: SourceS3Bucket 
-                S3ObjectKey: 
-                  Ref: SourceS3ObjectKey 
-              RunOrder: 1 
-        - 
-          Name: Beta 
-          Actions: 
-            - 
-              Name: BetaAction 
-              InputArtifacts: 
-                -
-                  Name: SourceOutput 
-              ActionTypeId: 
-                Category: Deploy 
-                Owner: AWS 
-                Version: 1 
-                Provider: CodeDeploy
-              Configuration: 
-                ApplicationName: 
-                  Ref: ApplicationName 
-                DeploymentGroupName: 
-                  Ref: DeploymentGroupName 
-              RunOrder: 1 
-        - 
-          Name: Release 
-          Actions: 
-            - 
-              Name: ReleaseAction
-              InputArtifacts: 
-                - 
-                  Name: SourceOutput 
-              ActionTypeId: 
-                Category: Deploy 
-                Owner: AWS 
-                Version: 1
-                Provider: CodeDeploy 
-              Configuration: 
-                ApplicationName: 
-                  Ref: ApplicationName
-                DeploymentGroupName: 
-                  Ref: DeploymentGroupName 
-              RunOrder: 1 
-      ArtifactStore: 
-        Type: S3 
-        Location:
-          Ref: ArtifactStoreS3Location 
-        EncryptionKey:
-          Id: arn:aws:kms:useast-1:ACCOUNT-ID:key/KEY-ID
-          Type: KMS
-      DisableInboundStageTransitions: 
-        - 
-          StageName: Release 
-          Reason: "Disabling the transition until integration tests are completed"
-      Tags:
-        - Key: Project
-          Value: ProjectA
-        - Key: IsContainerBased
-          Value: 'true'
+        Fn::GetAtt: [ rcodepipelineServiceRole, Arn ]
+      Stages:
+      - Name: Source
+        Actions:
+        - Name: Source
+          InputArtifacts: []
+          ActionTypeId:
+            Category: Source
+            Owner: ThirdParty
+            Version: 1
+            Provider: GitHub
+          OutputArtifacts:
+          - Name: SourceCode
+          Configuration:
+            Owner: 
+              Ref: pGitHubOwner
+            Repo: 
+              Ref: pGitHubRepo
+            Branch: 
+              Ref: pGitHubBranch
+            PollForSourceChanges: false
+            OAuthToken:
+              Ref: pGitHubOAuthToken          
+          RunOrder: 1
+
+      - Name: Deploy
+        Actions:
+        - Name: CloudFormationDeploy
+          ActionTypeId:
+            Category: Deploy
+            Owner: AWS
+            Provider: CloudFormation
+            Version: '1'
+          InputArtifacts:
+            - Name: SourceCode
+          Configuration:
+            ActionMode: CREATE_UPDATE
+            Capabilities: CAPABILITY_IAM
+            RoleArn: 
+              Fn::GetAtt: [ rcfnServiceRole, Arn ]
+            StackName: 
+              Ref: pstackName
+            TemplatePath: !Sub "SourceCode::cloudformation/infrastructure-traditional.yaml"
+            TemplateConfiguration: !Sub "SourceCode::cloudformation/infrastructure-traditional.json"
+          RunOrder: 1
+
+
+  rGITwebhook:
+    Type: 'AWS::CodePipeline::Webhook'
+    Properties:
+      Authentication: GITHUB_HMAC
+      AuthenticationConfiguration:
+        SecretToken: 
+          Ref: pGitHubOAuthToken
+      RegisterWithThirdParty: 'true'
+      Filters:
+      - JsonPath: "$.ref"
+        MatchEquals: refs/heads/{Branch}
+      TargetPipeline: 
+        Ref: rInfrastructurepipeline
+      TargetAction: Source
+      TargetPipelineVersion:
+        Fn::GetAtt: [ rInfrastructurepipeline, Version ]
+
+  rcodepipelineServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: codepipeline.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  rcfnServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: cloudformation.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
