@@ -22,7 +22,7 @@
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#pre-requisites">Pre-requisites</a></li>
         <li><a href="#architecture-diagrams-of-the-solution">Architecture diagrams of the solution</a></li>
       </ul>
     </li>
@@ -51,13 +51,13 @@ This section should list any major frameworks that you built your project using.
 <!-- GETTING STARTED -->
 ## Getting Started
 
-### Prerequisites
+### Pre-requisites
 
 - Fork the timeoff-management-application to your repositories to work from a feature/branch for the source-control deploy.
 
 - aws cli V2.0
 
-- An additional subnet if the default vpc is used.
+- An additional subnet if the default VPC is used.
 
 - Nat gateway for the EC2 instances to access internet (download and install packages).
 
@@ -65,7 +65,7 @@ This section should list any major frameworks that you built your project using.
 
 - Link previously created routes to the private subnets.
 
-- If public acess needed create an additional subnet and allow internet access with an InternetGateway.
+- If public access is needed create an additional subnet and allow internet access with an InternetGateway.
 
 - IAM user with proper permissions to use the CLI (AWS ACCESS KEY ID AND SECRET ACESS KEY).
 
@@ -384,3 +384,5 @@ hooks:
   ```
 
 
+Author: Juan Felipe Reyes Marles
+contact: juanfelipereyesmarles@gmail.com
