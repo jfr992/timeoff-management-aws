@@ -338,6 +338,14 @@ artifacts:
   files:
     - '**/*'
 ```
+
+BUILD LOGS (CLOUDWATCH):
+  <p align="center">
+    <a href="https://github.com/jfr992/timeoff-management-aws">
+      <img src="images/codebuildlogs.png" alt="codebuildlogs" style="width:70%">
+    </a>
+  </p>
+
 2. DEPLOYMENT: appspec.yml file
 
 In the application repo (fork: https://github.com/jfr992/timeoff-management-application), theres a folder called **scripts** that contains 5 shell scripts for every hoook that is declared in the appspec.yml file, they are simple but effective.
@@ -374,6 +382,5 @@ hooks:
       timeout: 300
       runas: root
   ```
-
 
 
