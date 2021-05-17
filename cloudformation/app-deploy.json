@@ -1,7 +1,7 @@
 [
     {
         "ParameterKey": "pGitHubOAuthToken",
-        "ParameterValue": "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"
+        "ParameterValue": "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"
     },
     {
         "ParameterKey": "pGitHubOwner",
@@ -30,5 +30,9 @@
     {
         "ParameterKey": "pTargetGroupName",
         "ParameterValue": "time-off-management-tg-https"
+    },
+    {
+        "ParameterKey": "pAsgName",
+        "ParameterValue": "timeoff-management-asg"
     }
 ]

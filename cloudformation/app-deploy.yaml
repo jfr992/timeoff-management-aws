@@ -26,6 +26,9 @@ Parameters:
     Type: String
     NoEcho: true
 
+  pAsgName:
+    Type: String
+
 Resources:
   rAppPipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -126,10 +129,10 @@ Resources:
         Type: GITHUB
         Location:
           Ref: pgithubRepo
-      Auth:
-        Type: OAUTH
-        Resource:
-          Ref: pGitHubOAuthToken
+        Auth:
+          Type: OAUTH
+          Resource:
+            Ref: rCodeBuildSourceCredential
       SourceVersion:
         Ref: pGitHubBranch
       Triggers:
@@ -168,10 +171,9 @@ Resources:
         Ref: rApplication
       DeploymentConfigName: 'CodeDeployDefault.OneAtATime'
       DeploymentGroupName: 'timeoff-management-dg'
+      AutoScalingGroups:
+        - Ref: pAsgName
       LoadBalancerInfo:
-        ElbInfoList: 
-          - Name:
-              Ref: pALBName
         TargetGroupInfoList:
           - Name:
               Ref: pTargetGroupName
@@ -210,3 +212,11 @@ Resources:
       TargetAction: Source
       TargetPipelineVersion:
         Fn::GetAtt: [ rAppPipeline, Version ]
+
+  rCodeBuildSourceCredential:
+    Type: AWS::CodeBuild::SourceCredential
+    Properties:
+      AuthType: PERSONAL_ACCESS_TOKEN
+      ServerType: GITHUB
+      Token: 
+        Ref: pGitHubOAuthToken
