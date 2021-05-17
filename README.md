@@ -209,8 +209,8 @@ With the template **previous-infrastructure.yaml** 5 resources are deployed:
 1. rS3artifacts: S3 Bucket to store the artifacts in the app pipeline.
 2. rInfrastructurepipeline: Pipeline to deploy the infrastructure needed for the app using a deploy stage invoking Cloudformation.
 3. rGITwebhook: GitHub WebHook to connect the pipeline Source Stage with Github with a personal access token.
-4. rcodepipelineServiceRole: IAM service role for CodePipeline (the permissions right know are wide open).
-5. rcfnServiceRole: Cloudformation service role (the permissions right know are wide open).
+4. rcodepipelineServiceRole: IAM service role for CodePipeline (the permissions right now are wide open).
+5. rcfnServiceRole: Cloudformation service role (the permissions right now are wide open).
 
 After the pipeline gets deployed via Cloudformation, the infrastructure of the timeoff-application gets deployed using the **infrastructure-traditional.yaml** template, this stacks is made up of several resources, below the detailed explanation:
 
@@ -289,9 +289,9 @@ Finally, with the template **app-deploy.yaml** the resources needed to build and
     --> Build (CodeBuild) using buildpsec.yml file located in the application repo. It does a basic test with the script calendar.js located in the application repo
     --> Deploy (CodeDeploy) using the appspec.yml file located in the application repo
 
-2. rcodepipelineServiceRole: IAM Role for app pipeline (the permissions right know are wide open).
+2. rcodepipelineServiceRole: IAM Role for app pipeline (the permissions right now are wide open).
 3. rcodeBuildProject: CodeBuild Project for the build stage, it has the configuration for compute type (where my code is going to be tested) and how is going to be   triggered (from a push from a specific branch).
-4. rcodeBuildServiceRole: IAM Role for CodeBuild (the permissions right know are wide open).
+4. rcodeBuildServiceRole: IAM Role for CodeBuild (the permissions right now are wide open).
 5. rApplication: Application created to deploy the app.
 6. rDeploymentGroup: Deployment group that has several configurations
    ```yaml
@@ -307,7 +307,7 @@ Finally, with the template **app-deploy.yaml** the resources needed to build and
         DeploymentOption: WITH_TRAFFIC_CONTROL
         DeploymentType: IN_PLACE --> Is not a BLUE/GREEN DEPLOYMENT ($$$)
     ```
-7. rcodeDeployServiceRole: IAM Role for CodeDeploy (the permissions right know are wide open).
+7. rcodeDeployServiceRole: IAM Role for CodeDeploy (the permissions right now are wide open).
 8. rGITwebhook: GitHub WebHook to connect the pipeline Source Stage with Github with a personal access token.
 9. rCodeBuildSourceCredential: SourceCredential for the codebuild project resource (connection with github).
 
