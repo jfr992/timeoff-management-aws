@@ -122,7 +122,7 @@ This section should list any major frameworks that you built your project using.
 
   <p align="center">
     <a href="https://github.com/jfr992/timeoff-management-aws">
-      <img src="images/previousInfrastructuredeploystack.png" alt="previousInfrastructuredeploystack" width="400" height="400">
+      <img src="images/previousInfrastructuredeploystack.png" alt="previousInfrastructuredeploystack" style="width:100%">
     </a>
   </p>
 
