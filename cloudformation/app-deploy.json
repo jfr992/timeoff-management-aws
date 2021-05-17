@@ -1,0 +1,34 @@
+[
+    {
+        "ParameterKey": "pGitHubOAuthToken",
+        "ParameterValue": "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"
+    },
+    {
+        "ParameterKey": "pGitHubOwner",
+        "ParameterValue": "jfr992"
+    },
+    {
+        "ParameterKey": "pGitHubRepo",
+        "ParameterValue": "timeoff-management-application"
+    },
+    {
+        "ParameterKey": "pGitHubBranch",
+        "ParameterValue": "feature/jreyes"
+    },
+    {
+        "ParameterKey": "pS3artifacts",
+        "ParameterValue": "timeoff-management-s3-devops"
+    },
+    {
+        "ParameterKey": "pgithubRepo",
+        "ParameterValue": "https://github.com/jfr992/timeoff-management-application.git"
+    },
+    {
+        "ParameterKey": "pALBName",
+        "ParameterValue": "timeoff-management-alb"
+    },
+    {
+        "ParameterKey": "pTargetGroupName",
+        "ParameterValue": "time-off-management-tg-https"
+    }
+]

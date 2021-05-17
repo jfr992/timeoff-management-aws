@@ -40,7 +40,8 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This repo contains the steps and the code needed to deploy the infrastructure and componentes needed to deploy the timeoff-management app. It can tbe reproduced if the guide is followed strictly.
+This repo contains the steps and the code needed to deploy the infrastructure and componentes needed to deploy the timeoff-management app. It can be reproduced if the guide is followed strictly.
+
 ### Built With
 
 This section should list any major frameworks that you built your project using. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
