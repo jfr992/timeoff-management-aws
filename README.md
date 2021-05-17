@@ -23,11 +23,11 @@
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#architecture">Architecture diagrams of the solution</a></li>
+        <li><a href="#architecture-diagrams-of-the-solution">Architecture diagrams of the solution</a></li>
       </ul>
     </li>
-    <li><a href="#steps">Steps to deploy the solutio</a></li>
-    <li><a href="#general">General explanation</a></li>
+    <li><a href="#steps-to-deploy-the-solution">Steps to deploy the solution</a></li>
+    <li><a href="#general-explanation">General explanation</a></li>
   </ol>
 </details>
 
