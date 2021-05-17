@@ -384,3 +384,5 @@ hooks:
   ```
 
 
+Author: Juan Felipe Reyes Marles
+contact: juanfelipereyesmarles@gmail.com
