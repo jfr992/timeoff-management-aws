@@ -130,7 +130,7 @@ This section should list any major frameworks that you built your project using.
 
   <p align="center">
     <a href="https://github.com/jfr992/timeoff-management-aws">
-      <img src="images/infrastack.png" alt="infrastack" width="400" height="400">
+      <img src="images/infrastack.png" alt="infrastack" style="width:100%">
     </a>
   </p>
 
@@ -138,11 +138,12 @@ This section should list any major frameworks that you built your project using.
 
   <p align="center">
     <a href="https://github.com/jfr992/timeoff-management-aws">
-      <img src="images/ec2healthy.png" alt="ec2healthy" width="400" height="400">
+      <img src="images/ec2healthy.png" alt="ec2healthy" style="width:100%">
     </a>
   </p>
 
 6. Deploy the app deploy stack using AWS CLI and cloudformation
+
    ```sh
   aws cloudformation create-stack --stack-name app-deploy --template-body file:///path/to/app-deploy.yaml --parameters file:///path/toapp-deploy.json --capabilities CAPABILITY_IAM
    ```
@@ -151,7 +152,7 @@ This section should list any major frameworks that you built your project using.
 
   <p align="center">
     <a href="https://github.com/jfr992/timeoff-management-aws">
-      <img src="images/appdeploystack.png" alt="ec2healthy" width="400" height="400">
+      <img src="images/appdeploystack.png" alt="ec2healthy" style="width:100%">
     </a>
   </p>
 
