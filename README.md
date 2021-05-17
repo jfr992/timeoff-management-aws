@@ -220,7 +220,7 @@ Note: The parameters are received from the json file **previous-infrastructure.j
 2. rSecurityGroup: Security group for the ec2 instances , it has access to port 3000.
 3. rIamProfile: Iam Profile for the resource rLaunchConfig.
 4. rRole: Iam Role with permissions to s3 (to access the artifacts of Codepipeline), ssm (to acess the instances with session manager)
-5. rLaunchConfig: Launch configuration that contains the script that is executed when the instances start (bootstrap script or userdata), also the amiId and the      instance type are parameters of the cfn template.
+5. rLaunchConfig: Launch configuration that contains the script that is executed when the instances start (bootstrap script or userdata), also the ami-ID and the      instance type are parameters of the cfn template.
     ```sh
     #!/bin/bash -x
     export PATH=~/.local/bin:/$PATH
