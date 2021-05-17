@@ -145,7 +145,7 @@ This section should list any major frameworks that you built your project using.
 6. Deploy the app deploy stack using AWS CLI and cloudformation
 
    ```sh
-  aws cloudformation create-stack --stack-name app-deploy --template-body file:///path/to/app-deploy.yaml --parameters file:///path/toapp-deploy.json --capabilities CAPABILITY_IAM
+   aws cloudformation create-stack --stack-name app-deploy --template-body file:///path/to/app-deploy.yaml --parameters file:///path/toapp-deploy.json --capabilities CAPABILITY_IAM
    ```
   
   Wait for the stack to be in CREATE_COMPLETE STATE
