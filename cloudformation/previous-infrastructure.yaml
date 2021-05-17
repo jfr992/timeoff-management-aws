@@ -1,11 +1,11 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys pipelines and previous infrastructure needed for everything (codepipeline,codedeploy,IAM and S3)
+Description: Deploys pipelines and previous infrastructure needed for everything (codepipeline,codedeploy,IAM and S3) Author JFRM
 
 Parameters:
 
-  pGitHubOAuthToken:
-    Type: String
-    NoEcho: true
+#  pGitHubOAuthToken:
+#    Type: String
+#    NoEcho: true
 
   pGitHubOwner:
     Type: String
@@ -62,8 +62,7 @@ Resources:
             Branch: 
               Ref: pGitHubBranch
             PollForSourceChanges: false
-            OAuthToken:
-              Ref: pGitHubOAuthToken          
+            OAuthToken: '{{resolve:secretsmanager:githubaccess-token:SecretString:token}}'          
           RunOrder: 1
 
       - Name: Deploy
@@ -87,14 +86,12 @@ Resources:
             TemplateConfiguration: !Sub "SourceCode::cloudformation/infrastructure-traditional.json"
           RunOrder: 1
 
-
   rGITwebhook:
     Type: 'AWS::CodePipeline::Webhook'
     Properties:
       Authentication: GITHUB_HMAC
       AuthenticationConfiguration:
-        SecretToken: 
-          Ref: pGitHubOAuthToken
+        SecretToken: '{{resolve:secretsmanager:githubaccess-token:SecretString:token}}'
       RegisterWithThirdParty: 'true'
       Filters:
       - JsonPath: "$.ref"

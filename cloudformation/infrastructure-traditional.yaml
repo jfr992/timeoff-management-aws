@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys traditional infrastructure to serve timeoff-management application
+Description: Deploys traditional infrastructure to serve timeoff-management application Author JFRM
 
 Parameters:
   ### AWS

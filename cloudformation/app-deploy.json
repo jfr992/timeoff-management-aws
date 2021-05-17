@@ -1,9 +1,5 @@
 [
     {
-        "ParameterKey": "pGitHubOAuthToken",
-        "ParameterValue": "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"
-    },
-    {
         "ParameterKey": "pGitHubOwner",
         "ParameterValue": "jfr992"
     },
