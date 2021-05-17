@@ -26,12 +26,8 @@
         <li><a href="#architecture">Architecture of the solution</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgements">Acknowledgements</a></li>
+    <li><a href="#steps">Steps to deploy the solution</a></li>
+    <li><a href="#roadmap">General Explanation</a></li>
   </ol>
 </details>
 
@@ -160,7 +156,7 @@ This section should list any major frameworks that you built your project using.
 
     <div class="row">
       <div class="column">
-        <img src="images/apppipelineinprogress.png" alt="apppipelineinprogress" style="width:100%">
+        <img src="images/apppipelineinprogess.png" alt="apppipelineinprogess" style="width:100%">
       </div>
       <div class="column">
         <img src="images/apppipelinesteps.png" alt="apppipelinesteps" style="width:100%">
@@ -185,19 +181,7 @@ This section should list any major frameworks that you built your project using.
     </div>
 
 
-<!-- USAGE EXAMPLES -->
-## Usage
+<!--General explanation -->
+## General explanation
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-
-
-<!-- ROADMAP -->
-## Roadmap
-
-See the [open issues](https://https://github.com/jfr992/timeoff-management-aws/issues) for a list of proposed features (and known issues).
-
-
-
+This project was developed to solve the challenge of having a highly available application, and that its CI/CD life cycle is fully met (SLDC).
